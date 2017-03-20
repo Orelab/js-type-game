@@ -1,0 +1,186 @@
+<!Doctype html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<script src="jquery-1.11.3.js"></script>
+
+	<link rel="stylesheet" href="bootstrap.min.css">
+	<link rel="stylesheet" href="bootstrap-theme.min.css">
+	<script src="bootstrap.min.js"></script>
+
+</head>
+<body>
+
+
+<main>
+
+	<h1>Le jeu des types JS</h1>
+	
+	<p>Cochez toutes les cases dont les <b>types</b> de variables sont identiques</p>
+	
+	<table id="jeu"></table>
+	
+	<button id="check">Valider mes réponses</button>
+	<button id="reset">Rejouer</button>
+	
+</main>
+
+
+
+<style>
+	main {
+		max-width: 1200px;
+		margin: auto;
+	}
+	table {
+		border-collapse: collapse;
+		overflow: hidden;
+		margin-bottom: 50px;
+	}
+	table, th, td {
+		position: relative;
+		border: 1px solid black;
+		min-width: 100px;
+		text-align: center;
+	}
+	
+	tr:hover {
+		background-color: #eee;
+	}
+	td:hover {
+		background-color: #ddd;
+	}
+	td:hover::after,		/* https://css-tricks.com/simple-css-row-column-highlighting/ */
+	th:hover::after {
+		content: "";
+		position: absolute;
+		background-color: #eee;
+		left: 0;
+		top: -5000px;
+		height: 10000px;
+		width: 100%;
+		z-index: -1;
+	}
+	button {
+		display: block;
+		margin: 5px auto;
+		padding: 10px;
+	}
+</style>
+
+
+
+<script>
+	
+	/* --[ prototypes ]---------------------------------------------------------- */
+	
+	
+	Array.prototype.random = function() {
+		return this[Math.floor(Math.random()*this.length)];
+	}
+	
+	
+	
+	/* --[ arrays ]------------------------------------------------------------- */
+	
+	var types = ['undefined','object','boolean','number','string','function'];
+	var objects = ['{}', 'null', '{a:1}', 'new Date()'];
+	var booleans = ['true', 'false', '1==5'];
+	var numbers = ['5', '8', '3.51', '0', '85', '999', '0', 'Infinity', 'NaN'];
+	var strings = ['""', '"5"', '"8"', '"une chaîne"', '"abcd"', 'typeof 10'];
+	var functions = ['function(){}', 'Math.random'];
+	
+	
+	
+	/* --[ program ]------------------------------------------------------------ */
+	
+	// variables generation (10x20)
+
+	var dimension = {largeur:10,hauteur:15};
+	var abscisses = [];
+	var ordonnees = [];
+	var nombreErreurs = 0;
+	
+	for( var i=0 ; i<dimension.largeur ; i++ ) {
+		abscisses.push( randomValue() );
+	}
+	for( var i=0 ; i<dimension.hauteur ; i++ ) {
+		ordonnees.push( randomValue() );
+	}
+
+
+	// HTML table generation (first row)
+
+	var ligne = $('<tr>').appendTo('#jeu').append('<th>');
+	
+	for( var j=0 ; j<abscisses.length ; j++) {
+		$('<th>').appendTo(ligne).text(abscisses[j]);
+	}
+
+
+	// HTML table generation (other rows)
+
+	for( j=0 ; j<ordonnees.length ; j++) {
+		ligne = $('<tr>').appendTo('#jeu');
+		$('<th>').appendTo(ligne).text(ordonnees[j]);
+		
+		for( var k=0 ; k<abscisses.length ; k++) {
+			$('<td>').appendTo(ligne).append('<input type="checkbox">');
+		}
+	}
+	
+	$('#check').on('click', checkIt);
+	$('#reset').on('click', reset);
+	
+
+
+	/* --[ functions ]---------------------------------------------------------- */
+	
+	function randomValue() {
+		var randomType = types.random();
+	
+		switch(randomType) {
+			case 'object' :	return objects.random(); break;
+			case 'boolean' : return booleans.random(); break;
+			case 'number' : return numbers.random(); break;
+			case 'string' : return strings.random(); break;
+			case 'function' : return functions.random(); break;
+			case 'object' : return objects.random(); break;
+			default : return 'undefined';
+		}
+	}
+
+
+	function checkIt() {
+		$('td').each(function() {
+			var ordonnee = eval('typeof ' + $(this).parent().first().text() );
+			var abscisse = eval('typeof ' + $('#jeu tr').first().children().eq( $(this).index() ).text() );
+			var choixJoueur = $(this).find('input').prop('checked');
+			
+			console.log( ordonnee +'/'+ abscisse +'/'+ choixJoueur );
+
+			if( ( ordonnee == abscisse ) == choixJoueur ) {
+					$(this).css('backgroundColor', 'lightGreen');
+				} else {
+					$(this).css('backgroundColor', 'pink');
+					nombreErreurs++;
+				}
+
+		}).promise().done(function() {
+			alert( nombreErreurs + ' erreurs !');
+		});
+	}
+
+
+	function reset() {
+		window.location.reload();
+	}
+
+</script>
+
+</body>
+</html>
+
+
+
