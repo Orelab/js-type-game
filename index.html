@@ -5,24 +5,25 @@
 	<meta charset="utf-8">
 	<script src="jquery-1.11.3.js"></script>
 
-	<link rel="stylesheet" href="bootstrap.min.css">
-	<link rel="stylesheet" href="bootstrap-theme.min.css">
-	<script src="bootstrap.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 </head>
 <body>
 
 
-<main>
+<main class="container-fuild">
 
 	<h1>Le jeu des types JS</h1>
 	
-	<p>Cochez toutes les cases dont les <b>types</b> de variables sont identiques</p>
+	<p>Cochez toutes les cases dont les <b>types</b> de variables/expressions sont identiques</p>
 	
 	<table id="jeu"></table>
 	
-	<button id="check">Valider mes réponses</button>
-	<button id="reset">Rejouer</button>
+	<button id="check" class="btn btn-lg btn-primary">Valider mes réponses</button>
+	<button id="reset" class="btn btn-lg btn-warning">Rejouer</button>
 	
 </main>
 
@@ -87,7 +88,7 @@
 	var types = ['undefined','object','boolean','number','string','function'];
 	var objects = ['{}', 'null', '{a:1}', 'new Date()'];
 	var booleans = ['true', 'false', '1==5'];
-	var numbers = ['5', '8', '3.51', '0', '85', '999', '0', 'Infinity', 'NaN'];
+	var numbers = ['5', '8', '3.51', '0', '85', '999', '0', 'Infinity', 'NaN', 'Math.random()'];
 	var strings = ['""', '"5"', '"8"', '"une chaîne"', '"abcd"', 'typeof 10'];
 	var functions = ['function(){}', 'Math.random'];
 	
@@ -97,7 +98,7 @@
 	
 	// variables generation (10x20)
 
-	var dimension = {largeur:10,hauteur:15};
+	var dimension = {largeur:8,hauteur:10};
 	var abscisses = [];
 	var ordonnees = [];
 	var nombreErreurs = 0;
@@ -130,6 +131,7 @@
 		}
 	}
 	
+	$('td').on('click', checkInput);
 	$('#check').on('click', checkIt);
 	$('#reset').on('click', reset);
 	
@@ -137,6 +139,12 @@
 
 	/* --[ functions ]---------------------------------------------------------- */
 	
+	function checkInput() {
+		var chk = $(this).find('input').prop('checked');
+		$(this).find('input').prop('checked', !chk);
+	}
+
+
 	function randomValue() {
 		var randomType = types.random();
 	
@@ -154,21 +162,26 @@
 
 	function checkIt() {
 		$('td').each(function() {
-			var ordonnee = eval('typeof ' + $(this).parent().first().text() );
-			var abscisse = eval('typeof ' + $('#jeu tr').first().children().eq( $(this).index() ).text() );
+			var ObjOrdonnee = $(this).parent().first().text();
+			var ObjAbscisse = $('#jeu tr').first().children().eq( $(this).index() ).text();
+
+			var ordonnee = eval('typeof (' + ObjOrdonnee + ')' );
+			var abscisse = eval('typeof (' + ObjAbscisse + ')' );
+
 			var choixJoueur = $(this).find('input').prop('checked');
 			
-			console.log( ordonnee +'/'+ abscisse +'/'+ choixJoueur );
-
 			if( ( ordonnee == abscisse ) == choixJoueur ) {
-					$(this).css('backgroundColor', 'lightGreen');
+				//	$(this).css('backgroundColor', 'lightGreen');
 				} else {
 					$(this).css('backgroundColor', 'pink');
 					nombreErreurs++;
 				}
 
 		}).promise().done(function() {
-			alert( nombreErreurs + ' erreurs !');
+			if( nombreErreurs > 0 )
+				alert( nombreErreurs + ' erreurs !');
+				else
+				alert( 'Gagné !');
 		});
 	}
 
