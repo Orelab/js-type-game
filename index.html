@@ -76,24 +76,35 @@
 	
 	/* --[ prototypes ]---------------------------------------------------------- */
 	
-	
 	Array.prototype.random = function() {
 		return this[Math.floor(Math.random()*this.length)];
 	}
-	
+
+	Array.prototype.shuffle = function() {
+		var j, x, i;
+		for (i = this.length; i; i--) {
+			j = Math.floor(Math.random() * i);
+			x = this[i - 1];
+			this[i - 1] = this[j];
+			this[j] = x;
+		}
+	}
+
 	
 	
 	/* --[ arrays ]------------------------------------------------------------- */
 	
-	var types = ['undefined','object','boolean','number','string','function'];
+	var types = ['undefined','object','boolean','number','string','function'];	// useless
 	var objects = ['{}', 'null', '{a:1}', 'new Date()'];
 	var booleans = ['true', 'false', '1==5'];
 	var numbers = ['5', '8', '3.51', '0', '85', '999', '0', 'Infinity', 'NaN', 'Math.random()'];
 	var strings = ['""', '"5"', '"8"', '"une chaîne"', '"abcd"', 'typeof 10'];
 	var functions = ['function(){}', 'Math.random'];
 	
-	
-	
+	var mixed = objects.concat(booleans).concat(numbers).concat(strings).concat(functions);
+
+
+
 	/* --[ program ]------------------------------------------------------------ */
 	
 	// variables generation (10x20)
@@ -101,13 +112,13 @@
 	var dimension = {largeur:8,hauteur:10};
 	var abscisses = [];
 	var ordonnees = [];
-	var nombreErreurs = 0;
+	var tentatives = 0;
 	
 	for( var i=0 ; i<dimension.largeur ; i++ ) {
-		abscisses.push( randomValue() );
+		abscisses.push( mixed.random() );
 	}
 	for( var i=0 ; i<dimension.hauteur ; i++ ) {
-		ordonnees.push( randomValue() );
+		ordonnees.push( mixed.random() );
 	}
 
 
@@ -131,36 +142,31 @@
 		}
 	}
 	
-	$('td').on('click', checkInput);
-	$('#check').on('click', checkIt);
+	$('input').on('click', checkInput);
+	$('td').on('click', checkTd);
+
+	$('#check').on('click', validate);
 	$('#reset').on('click', reset);
 	
 
 
 	/* --[ functions ]---------------------------------------------------------- */
 	
-	function checkInput() {
+	function checkInput(e) {
+		e.stopPropagation();
+	}
+
+
+	function checkTd() {
 		var chk = $(this).find('input').prop('checked');
 		$(this).find('input').prop('checked', !chk);
 	}
 
 
-	function randomValue() {
-		var randomType = types.random();
-	
-		switch(randomType) {
-			case 'object' :	return objects.random(); break;
-			case 'boolean' : return booleans.random(); break;
-			case 'number' : return numbers.random(); break;
-			case 'string' : return strings.random(); break;
-			case 'function' : return functions.random(); break;
-			case 'object' : return objects.random(); break;
-			default : return 'undefined';
-		}
-	}
+	function validate() {
+		var nombreErreurs = 0;
+		tentatives++;
 
-
-	function checkIt() {
 		$('td').each(function() {
 			var ObjOrdonnee = $(this).parent().first().text();
 			var ObjAbscisse = $('#jeu tr').first().children().eq( $(this).index() ).text();
@@ -171,9 +177,9 @@
 			var choixJoueur = $(this).find('input').prop('checked');
 			
 			if( ( ordonnee == abscisse ) == choixJoueur ) {
-				//	$(this).css('backgroundColor', 'lightGreen');
+					$(this).css('backgroundColor', 'initial');
 				} else {
-					$(this).css('backgroundColor', 'pink');
+				//	$(this).css('backgroundColor', 'pink');
 					nombreErreurs++;
 				}
 
@@ -181,7 +187,7 @@
 			if( nombreErreurs > 0 )
 				alert( nombreErreurs + ' erreurs !');
 				else
-				alert( 'Gagné !');
+				alert( 'Gagné en ' + tentatives + ' tentative' + (tentatives>1?'s':'')+ ' !');
 		});
 	}
 
